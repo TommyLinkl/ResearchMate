@@ -9,78 +9,7 @@ import panel as pn
 import bs4
 pn.extension()
 
-def prepare_vectorDB(selected_files, embeddings): 
-    # Load data
-    data = []
-    for i, file_path in enumerate(selected_files, start=1): 
-        print(i, file_path)
-        file_name = file_path.split("/")[-1]
-        file_type = file_path.split('.')[-1].lower() if '.' in file_path else ''
-        print(file_name)
-        print(file_type)
-
-        if file_type=="txt": 
-            loader = TextLoader(file_path)
-            one_file = loader.load()
-
-            for doc in one_file:
-                doc.metadata['source'] = f'File {i}'
-
-        elif file_type=="pdf": 
-            loader = PyPDFLoader(file_path)
-            one_file = loader.load_and_split()
-            print(one_file)
-            print(one_file[0])
-            for doc in one_file:
-                doc.metadata['source'] = f'File {i}'
-
-        elif file_type=="docx": 
-            loader = AzureAIDocumentIntelligenceLoader(api_endpoint=endpoint, api_key=key, file_path=file_path, api_model="prebuilt-layout")
-
-
-        data.extend(one_file)
-
-
-
-
-
-    '''
-        print(file_input.value[:40])
-        if file_input.value:
-            # print(vars(file_input))
-            file_content = file_input.value
-            file_name = file_input.name
-            file_type = file_name.split('.')[-1].lower() if '.' in file_name else ''
-            print(file_name)
-            # print(file_type)
-            
-            # Create a temporary file
-            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}", mode='wb') as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
-            
-            loader = TextLoader(temp_file_path)
-            one_file = loader.load()
-
-            for doc in one_file:
-                doc.metadata['source'] = f'File {i}'
-
-            data.extend(one_file)
-            os.remove(temp_file_path)
-    '''
-
-    '''
-    loader = WebBaseLoader(
-        web_paths=("https://lilianweng.github.io/posts/2023-06-23-agent/",),
-        bs_kwargs=dict(
-            parse_only=bs4.SoupStrainer(
-                class_=("post-content", "post-title", "post-header")
-            )
-        ),
-    )
-    '''
-    
-
+def split_and_store_vectorDB(data, vectorstore, embeddings): 
     # Splitter
     text_splitter = RecursiveCharacterTextSplitter(
         separators=['\n\n', '\n', '.', ','],
@@ -91,8 +20,10 @@ def prepare_vectorDB(selected_files, embeddings):
     # print(len(splits))
 
     # Vector Database
-    # vectorstore = FAISS.from_documents(splits, embeddings)
-    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+    if vectorstore is None:
+        vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+    else:
+        vectorstore.add_documents(documents=splits, embedding=embeddings)
 
     # Optionally, store the vector database
     '''
@@ -107,6 +38,50 @@ def prepare_vectorDB(selected_files, embeddings):
             vectorIndex = pickle.load(f)
     '''
 
+    return vectorstore
+
+def prepare_vectorDB_files(file_path_list, vectorstore, embeddings): 
+    # Load data
+    data = []
+    for i, file_path in enumerate(file_path_list, start=1): 
+        print(i, file_path)
+        file_name = file_path.split("/")[-1]
+        file_type = file_path.split('.')[-1].lower() if '.' in file_path else ''
+        print(file_name)
+        print(file_type)
+
+        if file_type=="txt": 
+            loader = TextLoader(file_path)
+            one_file = loader.load()
+
+            for doc in one_file:
+                doc.metadata['source'] = f'File {i} ({file_name})'
+
+        elif file_type=="pdf": 
+            loader = PyPDFLoader(file_path)
+            one_file = loader.load()
+            for j, page in enumerate(one_file, start=1):
+                page.metadata['source'] = f'File {i} ({file_name}) - page {j}'
+
+            """
+        elif file_type=="docx": 
+            loader = AzureAIDocumentIntelligenceLoader(file_path=file_path, api_model="prebuilt-layout")
+            one_file = loader.load()
+            """
+        else: 
+            raise TypeError(f"We don't allow the file type {file_type}. ")
+
+        data.extend(one_file)
+    
+    vectorstore = split_and_store_vectorDB(data, vectorstore, embeddings)
+    return vectorstore
+
+def prepare_vectorDB_URLs(URL_inputs, vectorstore, embeddings): 
+    # print([url.value for url in URL_inputs])
+    loaders = UnstructuredURLLoader(urls=[url.value for url in URL_inputs])
+    data = loaders.load() 
+
+    vectorstore = split_and_store_vectorDB(data, vectorstore, embeddings)
     return vectorstore
 
 def ragQA(question, user, instance, vectorstore, llm):

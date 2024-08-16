@@ -6,7 +6,7 @@ import panel as pn
 pn.extension()
 pn.config.console_output = 'both'
 
-from ragQA import ragQA, prepare_vectorDB
+from ragQA import ragQA, prepare_vectorDB_files, prepare_vectorDB_URLs
 from LLM import load_LLM, load_embeddings, run_llm
 
 ######################################################
@@ -72,7 +72,7 @@ def process_files(event):
     ]
     update_sidebar()
 
-    vectorstore = prepare_vectorDB(selected_files.value, load_embeddings(embeddings_dropdown.value))
+    vectorstore = prepare_vectorDB_files(selected_files.value, vectorstore, load_embeddings(embeddings_dropdown.value))
     chat_interface.send(f"{len(selected_files.value)} files processed successfully. Now you can ask questions about them. ", user="System", respond=False)
 
     file_container.objects = [
@@ -99,8 +99,25 @@ def add_URL_input(event):
 
 def process_URLs(event):
     global vectorstore
-    vectorstore = prepare_vectorDB(URL_inputs, load_embeddings(embeddings_dropdown.value))
-    chat_interface.send("URLs processed successfully. Now you can ask questions about this context. ", user="System", respond=False)
+
+    url_container.objects = [
+        pn.Row("### Input URLs: "), 
+        *create_labeled_URL_inputs(),  # Add URL inputs
+        "Processing URLs...", 
+        process_URLs_button
+    ]
+    update_sidebar()
+
+    vectorstore = prepare_vectorDB_URLs(URL_inputs, vectorstore, load_embeddings(embeddings_dropdown.value))
+    chat_interface.send(f"{len(URL_inputs)} URLs processed successfully. Now you can ask questions about them. ", user="System", respond=False)
+
+    url_container.objects = [
+        pn.Row("### Input URLs: "), 
+        *create_labeled_URL_inputs(),  # Add URL inputs
+        f"Processing URLs... {len(URL_inputs)} URLs processed successfully. ", 
+        process_URLs_button
+    ]
+    update_sidebar()
 
 def create_labeled_URL_inputs():
     global URL_inputs
@@ -124,7 +141,7 @@ def update_sidebar():
 
 def chatBot_dynamic(question, user, instance):
     # Check for uploaded files
-    if len(file_inputs) > 0:
+    if any(u.value for u in URL_inputs) or selected_files is not None:
         response = ragQA(question, user, instance, vectorstore, llm)
     else:
         response = run_llm(question, user, None, llm)
