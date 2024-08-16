@@ -12,7 +12,8 @@ from LLM import load_LLM, load_embeddings, run_llm
 ######################################################
 
 # Initialize empty list of file input widgets
-file_inputs = []
+selected_files = None
+URL_inputs = []
 
 llm_options = ["GPT-3.5 Turbo", "Meta-Llama-3.1-8B"]
 llm_dropdown = pn.widgets.Select(name='Choose LLM: ', options=llm_options)
@@ -24,20 +25,6 @@ embeddings = load_embeddings(embeddings_dropdown.value)
 
 vectorstore = None
 
-def add_file_input(event):
-    # Add a new FileInput widget with a unique label
-    new_index = len(file_inputs) + 1
-    new_file_input = pn.widgets.FileInput(accept=".txt,.docx,.pdf,.dat", height=50)
-    file_inputs.append(new_file_input)
-    
-    # Update sidebar with new file input
-    update_sidebar()
-
-def process_files(event):
-    global vectorstore
-    vectorstore = prepare_vectorDB(file_inputs, load_embeddings(embeddings_dropdown.value))
-    chat_interface.send("Files processed successfully. Now you can ask questions about this context. ", user="System", respond=False)
-
 def confirm_choices(event):
     # Set the chat interface to use the selected LLM and embeddings
     chat_interface.callback = chatBot_dynamic
@@ -46,38 +33,96 @@ def confirm_choices(event):
         user="System", 
         respond=False
     )
-    chat_interface.callback_user=f"{llm_dropdown.value} (retrieval mode)" if any(f.value for f in file_inputs) else f"{llm_dropdown.value}"
+    chat_interface.callback_user=f"{llm_dropdown.value} (retrieval mode)" if any(u.value for u in URL_inputs) or selected_files is not None else f"{llm_dropdown.value}"
 
     global llm
     global embeddings
     llm = load_LLM(llm_dropdown.value)
     embeddings = load_embeddings(embeddings_dropdown.value)
 
-def create_labeled_file_inputs():
-    # Create a list of labeled file input widgets
-    labeled_file_inputs = []
-    for i, file_input in enumerate(file_inputs, start=1):
-        label = pn.pane.Markdown(f"**File {i}:**")
-        labeled_file_inputs.append(pn.Row(label, file_input))
-    return labeled_file_inputs
+def select_files(event):
+    global selected_files
+    file_selector = pn.widgets.FileSelector('./') # , sizing_mode='fixed', width=100)
+    selected_files = file_selector  # Store the file selector widget
+
+    # Update sidebar with new file input
+    file_container.objects = [
+        pn.Row("### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat", cancel_file_button), 
+        selected_files,  # Add file selector widgets
+        process_files_button
+    ]
+    update_sidebar()
+
+def cancel_files(event):
+    file_container.objects = [
+        pn.Row("### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat", add_file_button), 
+        process_files_button
+    ]
+    update_sidebar()
+
+def process_files(event):
+    global vectorstore
+    global selected_files
+    print(selected_files)
+
+    file_container.objects = [
+        "### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat",
+        "Processing files...", 
+        process_files_button
+    ]
+    update_sidebar()
+
+    vectorstore = prepare_vectorDB(selected_files.value, load_embeddings(embeddings_dropdown.value))
+    chat_interface.send(f"{len(selected_files.value)} files processed successfully. Now you can ask questions about them. ", user="System", respond=False)
+
+    file_container.objects = [
+        pn.Column(
+            "### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat",
+            f"Processing files... {len(selected_files.value)} files processed successfully. "
+        ), 
+        process_files_button
+    ]
+    update_sidebar()
+
+def add_URL_input(event):
+    global URL_inputs
+    new_URL_input = pn.widgets.TextInput(placeholder='http://example.com')
+    URL_inputs.append(new_URL_input)
+
+    # Update sidebar with new file input
+    url_container.objects = [
+        pn.Row("### Input URLs: ", add_URL_button), 
+        *create_labeled_URL_inputs(),  # Add URL inputs
+        process_URLs_button
+    ]
+    update_sidebar()
+
+def process_URLs(event):
+    global vectorstore
+    vectorstore = prepare_vectorDB(URL_inputs, load_embeddings(embeddings_dropdown.value))
+    chat_interface.send("URLs processed successfully. Now you can ask questions about this context. ", user="System", respond=False)
+
+def create_labeled_URL_inputs():
+    global URL_inputs
+    labeled_URL_inputs = []
+    for i, URL_input in enumerate(URL_inputs, start=1):
+        labeled_URL_inputs.append(pn.Row(f"**URL {i}:**", URL_input))
+    return labeled_URL_inputs
 
 def update_sidebar():
-    # Update the sidebar layout with the current list of labeled file inputs and keep the buttons visible
+    # Combine all containers into the sidebar pane
     sidebar_pane.objects = [
         "## Settings",
         llm_dropdown,
         embeddings_dropdown,
-        confirm_button, 
-        "\n", "\n", "\n", 
-        pn.Row("### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat", add_file_button), 
-        *create_labeled_file_inputs(),  # Add labeled file inputs to the sidebar
-        process_files_button
+        confirm_button,
+        "\n", "\n", "\n", "\n",
+        file_container,
+        "\n", "\n", "\n", "\n",
+        url_container
     ]
 
 def chatBot_dynamic(question, user, instance):
-    # llm = load_LLM(llm_dropdown.value)
-    # embeddings = load_embeddings(embeddings_dropdown.value)
-
     # Check for uploaded files
     if len(file_inputs) > 0:
         response = ragQA(question, user, instance, vectorstore, llm)
@@ -88,7 +133,7 @@ def chatBot_dynamic(question, user, instance):
 
 chat_interface = pn.chat.ChatInterface(
     callback=chatBot_dynamic,
-    callback_user=f"{llm_dropdown.value} (retrieval mode)" if any(f.value for f in file_inputs) else f"{llm_dropdown.value}"
+    callback_user=f"{llm_dropdown.value} (retrieval mode)" if any(u.value for u in URL_inputs) or selected_files is not None else f"{llm_dropdown.value}"
 )
 chat_interface.send(
     "Please first choose an LLM and an embedding. Click **\"Confirm choices\"** to continue.", 
@@ -97,14 +142,34 @@ chat_interface.send(
 )
 
 # Buttons for additional functionality
-add_file_button = pn.widgets.Button(name="Attach another file", button_type="primary")
-add_file_button.on_click(add_file_input)
+confirm_button = pn.widgets.Button(name="Confirm choices", button_type="primary")
+confirm_button.on_click(confirm_choices)
+
+add_file_button = pn.widgets.Button(name="Attach files", button_type="primary")
+add_file_button.on_click(select_files)
+
+cancel_file_button = pn.widgets.Button(name="Cancel files", button_type="warning")
+cancel_file_button.on_click(cancel_files)
 
 process_files_button = pn.widgets.Button(name="Process files", button_type="success")
 process_files_button.on_click(process_files)
 
-confirm_button = pn.widgets.Button(name="Confirm choices", button_type="primary")
-confirm_button.on_click(confirm_choices)
+add_URL_button = pn.widgets.Button(name="Add another URL", button_type="primary")
+add_URL_button.on_click(add_URL_input)
+
+process_URLs_button = pn.widgets.Button(name="Process URLs", button_type="success")
+process_URLs_button.on_click(process_URLs)
+
+# Create containers for the sidebar elements
+file_container = pn.Column(
+    pn.Row("### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat", add_file_button), 
+    process_files_button
+)
+
+url_container = pn.Column(
+    pn.Row("### Input URLs: ", add_URL_button), 
+    process_URLs_button
+)
 
 # Initial sidebar setup with only the button
 sidebar_pane = pn.Column(
@@ -112,12 +177,13 @@ sidebar_pane = pn.Column(
     llm_dropdown,
     embeddings_dropdown,
     confirm_button, 
-    "\n", "\n", "\n", 
-    pn.Row("### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat", add_file_button), 
-    process_files_button,
+    "\n", "\n", "\n", "\n", 
+    file_container, 
+    "\n", "\n", "\n", "\n", 
+    url_container, 
     width=370,  # Fixed width for sidebar
     height=800, 
-    sizing_mode="fixed",  # Ensure the sidebar has a fixed width
+    sizing_mode="fixed", 
     margin=(10, 10, 10, 10),  # Add some margin to the sidebar
 )
 
