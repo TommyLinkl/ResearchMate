@@ -37,3 +37,54 @@ def run_llm(userMessage, user, chat_interface, llm):
     chat_response = llm.invoke(input = messages)
 
     return chat_response.content
+
+
+# More LLM's 
+'''
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+
+os.environ["ANTHROPIC_API_KEY"] = getpass.getpass()
+from langchain_anthropic import ChatAnthropic
+llm = ChatAnthropic("model="claude-3-sonnet-20240229", temperature=0.2, max_tokens=1024")
+
+os.environ['COHERE_API_KEY'] = cohere_key
+from langchain_cohere import CohereModel
+llm = CohereModel(model="command-xlarge", temperature=0.7)
+
+os.environ["GOOGLE_API_KEY"] = getpass.getpass()
+from langchain_google_vertexai import ChatVertexAI
+llm = ChatVertexAI(model="gemini-1.5-flash")
+
+os.environ["COHERE_API_KEY"] = getpass.getpass()
+from langchain_cohere import ChatCohere
+llm = ChatCohere(model="command-r-plus")
+
+os.environ["NVIDIA_API_KEY"] = getpass.getpass()
+from langchain import ChatNVIDIA
+llm = ChatNVIDIA(model="meta/llama3-70b-instruct")
+
+os.environ["GROQ_API_KEY"] = getpass.getpass()
+from langchain_groq import ChatGroq
+llm = ChatGroq(model="llama3-8b-8192")
+
+os.environ["MISTRAL_API_KEY"] = getpass.getpass()
+from langchain_mistralai import ChatMistralAI
+llm = ChatMistralAI(model="mistral-large-latest")
+'''
+
+
+
+
+
+
+
+# More embeddings 
+'''
+OpenAIEmbeddings(model="text-embedding-ada-002")
+
+from langchain_cohere import CohereEmbeddings
+embeddings = CohereEmbeddings(model="large")
+
+from langchain_huggingface import HuggingFaceEmbeddings
+embeddings = HuggingFaceEmbeddings(model="sentence-transformers/all-MiniLM-L6-v2")
+'''

@@ -9,21 +9,31 @@ import panel as pn
 import bs4
 pn.extension()
 
-def ragQA(question, user, instance, file_input, llm, embeddings):
+def prepare_vectorDB(file_input_list, embeddings): 
     # Load data
-    file_content = file_input.value
-    file_name = file_input.name
-    file_type = file_name.split('.')[-1].lower() if '.' in file_name else ''
-    # print(file_name)
-    # print(file_type)
-    
-    # Create a temporary file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}", mode='wb') as temp_file:
-        temp_file.write(file_content)
-        temp_file_path = temp_file.name
-    
-    # Determine the appropriate loader based on file type
-    loader = TextLoader(temp_file_path)
+    data = []
+    for i, file_input in enumerate(file_input_list, start=1): 
+        if file_input.value:
+            # print(vars(file_input))
+            file_content = file_input.value
+            file_name = file_input.name
+            file_type = file_name.split('.')[-1].lower() if '.' in file_name else ''
+            print(file_name)
+            # print(file_type)
+            
+            # Create a temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}", mode='wb') as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+            
+            loader = TextLoader(temp_file_path)
+            one_file = loader.load()
+
+            for doc in one_file:
+                doc.metadata['source'] = f'File {i}'
+
+            data.extend(one_file)
+            os.remove(temp_file_path)
 
     '''
     loader = WebBaseLoader(
@@ -35,9 +45,7 @@ def ragQA(question, user, instance, file_input, llm, embeddings):
         ),
     )
     '''
-    # Load and return data
-    data = loader.load()
-    os.remove(temp_file_path)
+    
 
     # Splitter
     text_splitter = RecursiveCharacterTextSplitter(
@@ -46,7 +54,7 @@ def ragQA(question, user, instance, file_input, llm, embeddings):
         chunk_overlap=300
     )
     splits = text_splitter.split_documents(data)
-    print(len(splits))
+    # print(len(splits))
 
     # Vector Database
     # vectorstore = FAISS.from_documents(splits, embeddings)
@@ -65,12 +73,17 @@ def ragQA(question, user, instance, file_input, llm, embeddings):
             vectorIndex = pickle.load(f)
     '''
 
+    return vectorstore
+
+def ragQA(question, user, instance, vectorstore, llm):
+    
     # Retrieval
-    chain = RetrievalQAWithSourcesChain.from_llm(llm=llm, retriever=vectorstore.as_retriever())
+    chain = RetrievalQAWithSourcesChain.from_llm(llm=llm, retriever=vectorstore.as_retriever(search_kwargs={"k": 5}))
     # basic_rag_chain = RetrievalQA.from_chain_type(llm=llm, chain_type='stuff', retriever=vectorstore.as_retriever())
     response = chain.invoke({"question": question}, return_only_outputs=True)
     # response = basic_rag_chain.invoke(query)
 
+    print(response)
     answer = response.get('answer', 'No answer provided')
     sources = response.get('sources', 'No sources provided')
-    return {'object': answer + f"\n The sources are {sources}"}
+    return {'object': answer + f"\n The sources are: {sources}"}
