@@ -1,0 +1,9 @@
+panel
+python-dotenv
+langchain-openai
+langchain-groq
+langchain-google-genai
+langchain-community
+faiss-cpu
+chromadb
+beautifulsoup4

@@ -87,4 +87,6 @@ embeddings = CohereEmbeddings(model="large")
 
 from langchain_huggingface import HuggingFaceEmbeddings
 embeddings = HuggingFaceEmbeddings(model="sentence-transformers/all-MiniLM-L6-v2")
+
+For text data, popular open-source embedding models include Word2Vec, GloVe, FastText or pretrained transformer-based models like BERT or RoBERTa. 
 '''

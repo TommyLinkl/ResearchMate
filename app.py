@@ -29,10 +29,21 @@ def confirm_choices(event):
     # Set the chat interface to use the selected LLM and embeddings
     chat_interface.callback = chatBot_dynamic
     chat_interface.send(
-        "Choices of LLM and embeddings are confirmed. You can now either \n1) upload files and ask specific questions about their content, or \n2) send a message to get a reply from the LLM without context. ", 
-        user="System", 
-        respond=False
-    )
+    pn.pane.Markdown(
+        """
+        Choices of LLM and embeddings are confirmed. You can now do the following:
+
+        1) **Retrieval-based question answering**  
+            - Select local files to upload via the `Attach files` button, or  
+            - Add several URLs of the websites via the `Add URL` button,  
+            After clicking the `process files` or `process URLs` button, you may ask specific questions about this content.
+
+        2) **Pure LLM inference**  
+            - Send a message to get a reply from the LLM without any additional context.
+        """),
+    user="System",
+    respond=False
+)
     chat_interface.callback_user=f"{llm_dropdown.value} (retrieval mode)" if any(u.value for u in URL_inputs) or selected_files is not None else f"{llm_dropdown.value}"
 
     global llm
@@ -47,7 +58,7 @@ def select_files(event):
 
     # Update sidebar with new file input
     file_container.objects = [
-        pn.Row("### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat", cancel_file_button), 
+        pn.Row(pn.pane.Markdown("### Upload files for retrieval:\nAllowed formats: .txt, .pdf"), cancel_file_button), 
         selected_files,  # Add file selector widgets
         process_files_button
     ]
@@ -55,7 +66,7 @@ def select_files(event):
 
 def cancel_files(event):
     file_container.objects = [
-        pn.Row("### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat", add_file_button), 
+        pn.Row(pn.pane.Markdown("### Upload files for retrieval:\nAllowed formats: .txt, .pdf"),  add_file_button), 
         process_files_button
     ]
     update_sidebar()
@@ -66,7 +77,7 @@ def process_files(event):
     print(selected_files)
 
     file_container.objects = [
-        "### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat",
+        pn.pane.Markdown("### Upload files for retrieval:\nAllowed formats: .txt, .pdf"), 
         "Processing files...", 
         process_files_button
     ]
@@ -77,7 +88,7 @@ def process_files(event):
 
     file_container.objects = [
         pn.Column(
-            "### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat",
+            pn.pane.Markdown("### Upload files for retrieval:\nAllowed formats: .txt, .pdf"), 
             f"Processing files... {len(selected_files.value)} files processed successfully. "
         ), 
         process_files_button
@@ -179,7 +190,7 @@ process_URLs_button.on_click(process_URLs)
 
 # Create containers for the sidebar elements
 file_container = pn.Column(
-    pn.Row("### Upload files for retrieval:\nAllowed formats: .txt, .docx, .pdf, .dat", add_file_button), 
+    pn.Row(pn.pane.Markdown("### Upload files for retrieval:\nAllowed formats: .txt, .pdf"), add_file_button), 
     process_files_button
 )
 

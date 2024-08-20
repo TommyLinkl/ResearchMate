@@ -13,7 +13,7 @@ def split_and_store_vectorDB(data, vectorstore, embeddings):
     # Splitter
     text_splitter = RecursiveCharacterTextSplitter(
         separators=['\n\n', '\n', '.', ','],
-        chunk_size=2048,
+        chunk_size=1024,
         chunk_overlap=300
     )
     splits = text_splitter.split_documents(data)
@@ -44,11 +44,11 @@ def prepare_vectorDB_files(file_path_list, vectorstore, embeddings):
     # Load data
     data = []
     for i, file_path in enumerate(file_path_list, start=1): 
-        print(i, file_path)
+        # print(i, file_path)
         file_name = file_path.split("/")[-1]
         file_type = file_path.split('.')[-1].lower() if '.' in file_path else ''
-        print(file_name)
-        print(file_type)
+        # print(file_name)
+        # print(file_type)
 
         if file_type=="txt": 
             loader = TextLoader(file_path)
@@ -63,11 +63,6 @@ def prepare_vectorDB_files(file_path_list, vectorstore, embeddings):
             for j, page in enumerate(one_file, start=1):
                 page.metadata['source'] = f'File {i} ({file_name}) - page {j}'
 
-            """
-        elif file_type=="docx": 
-            loader = AzureAIDocumentIntelligenceLoader(file_path=file_path, api_model="prebuilt-layout")
-            one_file = loader.load()
-            """
         else: 
             raise TypeError(f"We don't allow the file type {file_type}. ")
 
