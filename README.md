@@ -9,10 +9,10 @@ A tool combining the power of LLMs with real-time data retrieval to enhance rese
 
 ### Features
 
-1. **Retrieval-Augmented Generation (RAG)**: Combines LLM capabilities with real-time data retrieval to improve response accuracy.
-2. **Support for Local Files and Web Sources**: Upload local files or retrieve content from the web for more targeted question answering.
-3. **Source-Based Answers**: Generates responses that are grounded in the latest available data, ensuring relevance and factual accuracy.
-
+1. **Retrieval-Augmented Generation (RAG)**: Seamlessly integrates LLM capabilities with real-time data retrieval, ensuring enhanced accuracy and contextual relevance in responses.
+2. **Support for Local Files and Web Sources**: Enables the upload of local files or retrieval of web content for targeted and context-specific question answering.
+3. **Source-Based Responses**: Delivers answers grounded in the most recent and reliable data, ensuring up-to-date relevance and factual precision.
+4. **Diverse LLM and Embedding Support**: Offers adaptability with multiple language model and embedding choices for fine-tuning performance based on specific use cases.
 
 ---
 
