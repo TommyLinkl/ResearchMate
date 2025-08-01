@@ -1,9 +1,28 @@
-panel
+# Core web framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Original requirements
 python-dotenv
 langchain-openai
 langchain-groq
 langchain-google-genai
 langchain-community
+langchain-huggingface
 faiss-cpu
 chromadb
 beautifulsoup4
+
+# Additional dependencies for new architecture
+pydantic
+sqlalchemy
+aiofiles
+sentence-transformers
+transformers
+torch
+pypdf
+numpy
+
+# Optional: Keep panel for legacy support if needed
+panel

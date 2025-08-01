@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResearchMate - ML-Powered Research Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            height: calc(100vh - 30px);
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px 20px;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .sidebar h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            color: #6c757d;
+            font-size: 1em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        select, input[type="file"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #495057;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 250px;
+            max-height: calc(100vh - 350px);
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.assistant {
+            background: white;
+            border: 1px solid #e9ecef;
+            margin-right: auto;
+        }
+
+        .message.system {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            margin: 0 auto;
+            text-align: center;
+            max-width: 90%;
+        }
+
+        .sources {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e9ecef;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .sources strong {
+            color: #495057;
+        }
+
+        .chat-input {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 18px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            min-height: 50px;
+            line-height: 1.4;
+            width: calc(100% - 120px);
+        }
+
+        .chat-input button {
+            padding: 18px 20px;
+            border-radius: 25px;
+            white-space: nowrap;
+            width: 100px;
+            flex-shrink: 0;
+            flex-grow: 0;
+        }
+
+        .status {
+            padding: 10px 20px;
+            background: #e3f2fd;
+            color: #0277bd;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .url-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .url-input input {
+            flex: 1;
+        }
+
+        .url-input button {
+            width: auto;
+            margin-top: 0;
+            padding: 10px 15px;
+        }
+
+
+        .model-description {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                margin: 10px;
+            }
+            
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Settings</h2>
+            
+            <div class="section">
+                <h3>Model Configuration</h3>
+                <div class="form-group">
+                    <label for="llm-select">Choose LLM Model:</label>
+                    <select id="llm-select">
+                        <option>Loading...</option>
+                    </select>
+                </div>
+                
+                
+                <button class="btn" id="confirm-models">Set Model</button>
+            </div>
+            
+            <div class="section">
+                <h3>Upload Files</h3>
+                <div class="form-group">
+                    <label for="file-input">Supported: PDF, TXT</label>
+                    <input type="file" id="file-input" multiple accept=".pdf,.txt">
+                </div>
+                <button class="btn" id="upload-files">Process Files</button>
+            </div>
+            
+            <div class="section">
+                <h3>Add URLs</h3>
+                <div id="url-inputs">
+                    <div class="url-input">
+                        <input type="text" placeholder="https://example.com" class="url-field">
+                        <button class="btn btn-secondary" onclick="addUrlField()">+</button>
+                    </div>
+                </div>
+                <button class="btn" id="process-urls">Process URLs</button>
+            </div>
+            
+            <div class="section">
+                <h3>System Info</h3>
+                <div id="stats">
+                    <p>Documents: <span id="doc-count">0</span></p>
+                    <p>Queries: <span id="query-count">0</span></p>
+                    <p>Avg Response: <span id="avg-time">0.0s</span></p>
+                </div>
+                <button class="btn btn-danger" id="clear-docs">Clear Documents</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>ResearchMate</h1>
+                <p>ML-Powered Research Assistant</p>
+            </div>
+            
+            <div class="chat-container">
+                <div id="status" class="status">
+                    Select your LLM model and optionally upload documents to get started.
+                </div>
+                
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message system">
+                        Welcome to ResearchMate! Select your LLM model and upload documents to begin.
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="query-input" placeholder="Ask a question..." disabled>
+                    <button class="btn" id="send-btn" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let sessionId = null;
+        let isConfigured = false;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadModels();
+            updateStats();
+            
+            // Event listeners
+            document.getElementById('confirm-models').addEventListener('click', confirmModels);
+            document.getElementById('upload-files').addEventListener('click', uploadFiles);
+            document.getElementById('process-urls').addEventListener('click', processUrls);
+            document.getElementById('send-btn').addEventListener('click', sendQuery);
+            document.getElementById('clear-docs').addEventListener('click', clearDocuments);
+            
+            // Enter key for query input
+            document.getElementById('query-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendQuery();
+                }
+            });
+        });
+
+        async function loadModels() {
+            try {
+                const response = await fetch(`${API_BASE}/models`);
+                const models = await response.json();
+                
+                const select = document.getElementById('llm-select');
+                select.innerHTML = '';
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    option.disabled = !model.available;
+                    if (!model.available) {
+                        option.textContent += ' (Coming Soon)';
+                    }
+                    select.appendChild(option);
+                    
+                    // Add description if available
+                    if (model.description) {
+                        const description = document.createElement('div');
+                        description.className = 'model-description';
+                        description.textContent = model.description;
+                        // Note: We can't add this to select options, but we could show it elsewhere
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading models:', error);
+                showStatus('Error loading models', 'error');
+            }
+        }
+
+
+        async function confirmModels() {
+            const llmName = document.getElementById('llm-select').value;
+            
+            // Check if selected model is available
+            const selectedOption = document.querySelector(`#llm-select option[value="${llmName}"]`);
+            if (selectedOption && selectedOption.disabled) {
+                showStatus('Selected model is not yet available', 'error');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('llm_model', llmName);
+                
+                const response = await fetch(`${API_BASE}/set-model`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    isConfigured = true;
+                    document.getElementById('query-input').disabled = false;
+                    document.getElementById('send-btn').disabled = false;
+                    showStatus(`Model set to ${llmName}! You can now ask questions.`, 'success');
+                    addMessage('system', `Model configured: ${llmName}. You can now upload documents for RAG or ask direct questions.`);
+                } else {
+                    throw new Error(result.detail || 'Failed to configure model');
+                }
+            } catch (error) {
+                console.error('Error confirming model:', error);
+                showStatus('Error configuring model', 'error');
+            }
+        }
+
+        async function uploadFiles() {
+            const fileInput = document.getElementById('file-input');
+            const files = fileInput.files;
+            
+            if (files.length === 0) {
+                showStatus('Please select files to upload', 'error');
+                return;
+            }
+            
+            showStatus('Processing files...', 'info');
+            
+            try {
+                const formData = new FormData();
+                for (let file of files) {
+                    formData.append('files', file);
+                }
+                
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showStatus(`Successfully processed ${result.files_processed} files`, 'success');
+                    addMessage('system', `Processed ${result.files_processed} files. You can now ask questions about them.`);
+                    updateStats();
+                } else {
+                    throw new Error(result.detail || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Error uploading files:', error);
+                showStatus('Error processing files', 'error');
+            }
+        }
+
+        async function processUrls() {
+            const urlFields = document.querySelectorAll('.url-field');
+            const urls = Array.from(urlFields)
+                .map(field => field.value.trim())
+                .filter(url => url.length > 0);
+            
+            if (urls.length === 0) {
+                showStatus('Please enter at least one URL', 'error');
+                return;
+            }
+            
+            showStatus('Processing URLs...', 'info');
+            
+            try {
+                const formData = new FormData();
+                urls.forEach(url => formData.append('urls', url));
+                
+                const response = await fetch(`${API_BASE}/upload-urls`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showStatus(`Successfully processed ${result.urls_processed} URLs`, 'success');
+                    addMessage('system', `Processed ${result.urls_processed} URLs. You can now ask questions about them.`);
+                    updateStats();
+                } else {
+                    throw new Error(result.detail || 'URL processing failed');
+                }
+            } catch (error) {
+                console.error('Error processing URLs:', error);
+                showStatus('Error processing URLs', 'error');
+            }
+        }
+
+        async function sendQuery() {
+            if (!isConfigured) {
+                showStatus('Please configure models first', 'error');
+                return;
+            }
+            
+            const queryInput = document.getElementById('query-input');
+            const query = queryInput.value.trim();
+            
+            if (!query) {
+                return;
+            }
+            
+            // Add user message
+            addMessage('user', query);
+            queryInput.value = '';
+            
+            // Show loading
+            const loadingId = addMessage('assistant', '<div class="loading"></div>');
+            
+            try {
+                const response = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        llm_model: document.getElementById('llm-select').value,
+                        use_retrieval: true,
+                        session_id: sessionId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    sessionId = result.session_id;
+                    
+                    // Update loading message with response
+                    let content = result.answer;
+                    if (result.sources && result.sources.length > 0) {
+                        content += `<div class="sources"><strong>Sources:</strong> ${result.sources.join(', ')}</div>`;
+                    }
+                    
+                    updateMessage(loadingId, content);
+                    updateStats();
+                } else {
+                    throw new Error(result.detail || 'Query failed');
+                }
+            } catch (error) {
+                console.error('Error sending query:', error);
+                updateMessage(loadingId, 'Sorry, there was an error processing your query.');
+                showStatus('Error processing query', 'error');
+            }
+        }
+
+        async function clearDocuments() {
+            if (!confirm('Are you sure you want to clear all documents?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/documents`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showStatus('All documents cleared', 'success');
+                    addMessage('system', 'All documents have been cleared from the database.');
+                    updateStats();
+                } else {
+                    throw new Error('Failed to clear documents');
+                }
+            } catch (error) {
+                console.error('Error clearing documents:', error);
+                showStatus('Error clearing documents', 'error');
+            }
+        }
+
+        function addUrlField() {
+            const container = document.getElementById('url-inputs');
+            const urlInput = document.createElement('div');
+            urlInput.className = 'url-input';
+            urlInput.innerHTML = `
+                <input type="text" placeholder="https://example.com" class="url-field">
+                <button class="btn btn-danger" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(urlInput);
+        }
+
+        function addMessage(type, content) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            const messageId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            
+            messageDiv.id = messageId;
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = content;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            return messageId;
+        }
+
+        function updateMessage(messageId, content) {
+            const messageElement = document.getElementById(messageId);
+            if (messageElement) {
+                messageElement.innerHTML = content;
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            
+            setTimeout(() => {
+                statusElement.textContent = 'Ready';
+                statusElement.className = 'status';
+            }, 5000);
+        }
+
+        async function updateStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const stats = await response.json();
+                
+                document.getElementById('doc-count').textContent = stats.total_documents || 0;
+                document.getElementById('query-count').textContent = stats.total_queries || 0;
+                document.getElementById('avg-time').textContent = (stats.average_response_time || 0).toFixed(2) + 's';
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+    </script>
+</body>
+</html>
