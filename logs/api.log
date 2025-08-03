@@ -209,3 +209,318 @@
 2025-08-01 10:33:47,481 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
 2025-08-01 10:33:47,481 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
 2025-08-01 10:33:47,481 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:42:37,781 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:42:37,794 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:42:37,794 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:42:37,794 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:42:37,794 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:42:37,794 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:42:37,797 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:42:42,147 - backend.models.llm_manager - INFO - Active model changed to: Llama-3.1-8B
+2025-08-01 10:42:50,169 - backend.api.main - INFO - Uploading 1 files
+2025-08-01 10:42:50,170 - backend.models.embedding_manager - INFO - Initializing embedding model (first time only)...
+2025-08-01 10:42:57,420 - numexpr.utils - INFO - Note: NumExpr detected 12 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+2025-08-01 10:42:57,421 - numexpr.utils - INFO - NumExpr defaulting to 8 threads.
+2025-08-01 10:42:58,271 - backend.models.embedding_manager - WARNING - langchain_huggingface not available: Your currently installed version of Keras is Keras 3, but this is not yet supported in Transformers. Please install the backwards-compatible tf-keras package with `pip install tf-keras`.
+2025-08-01 10:42:58,273 - backend.models.embedding_manager - WARNING - sentence-transformers not available: Your currently installed version of Keras is Keras 3, but this is not yet supported in Transformers. Please install the backwards-compatible tf-keras package with `pip install tf-keras`.
+2025-08-01 10:42:58,406 - backend.models.embedding_manager - INFO - Fallback to OpenAI embeddings (API key found)
+2025-08-01 10:42:59,070 - backend.retrieval.rag_pipeline - INFO - Successfully processed file: Machine-Learning-Based Interatomic Potentials for Group IIB to VIA Semiconductors- Towards a Universal Model.pdf
+2025-08-01 10:42:59,072 - backend.retrieval.rag_pipeline - INFO - Split 32 documents into 114 chunks
+2025-08-01 10:42:59,300 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-08-01 10:43:00,024 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:43:00,025 - openai._base_client - INFO - Retrying request to /embeddings in 0.771726 seconds
+2025-08-01 10:43:01,406 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:43:01,407 - openai._base_client - INFO - Retrying request to /embeddings in 1.856064 seconds
+2025-08-01 10:43:03,426 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:43:03,427 - backend.api.main - ERROR - Error uploading files: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-08-01 10:43:12,241 - backend.api.main - INFO - Processing query for session 4e6fdae7-d02c-4703-8ffa-6e22772a0d37: Please give me a summary of machine learning interatomic potential based on the file I uploaded...
+2025-08-01 10:43:12,248 - backend.api.main - INFO - Query processed successfully in 0.00s
+2025-08-01 10:43:29,477 - backend.api.main - INFO - Uploading 1 files
+2025-08-01 10:43:30,329 - backend.retrieval.rag_pipeline - INFO - Successfully processed file: Machine-Learning-Based Interatomic Potentials for Group IIB to VIA Semiconductors- Towards a Universal Model.pdf
+2025-08-01 10:43:30,331 - backend.retrieval.rag_pipeline - INFO - Split 32 documents into 114 chunks
+2025-08-01 10:43:33,104 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:43:33,106 - openai._base_client - INFO - Retrying request to /embeddings in 0.806038 seconds
+2025-08-01 10:43:34,580 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:43:34,580 - openai._base_client - INFO - Retrying request to /embeddings in 1.875510 seconds
+2025-08-01 10:43:37,441 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:43:37,441 - backend.api.main - ERROR - Error uploading files: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-08-01 10:43:39,356 - backend.api.main - INFO - Processing query for session 4e6fdae7-d02c-4703-8ffa-6e22772a0d37: Please give me a summary of machine learning interatomic potential based on the file I uploaded...
+2025-08-01 10:43:39,359 - backend.api.main - INFO - Query processed successfully in 0.00s
+2025-08-01 10:46:05,692 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:46:05,704 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:46:05,704 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:46:05,704 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:46:05,704 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:46:05,704 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:46:05,705 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:46:06,528 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:46:06,539 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:46:06,539 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:46:06,539 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:46:06,539 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:46:06,539 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:46:06,539 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:46:07,394 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:46:07,412 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:46:07,412 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:46:07,412 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:46:07,412 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:46:07,412 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:46:07,413 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:46:08,591 - backend.api.main - INFO - Uploading 1 files
+2025-08-01 10:46:08,591 - backend.models.embedding_manager - INFO - Initializing embedding model (first time only)...
+2025-08-01 10:46:28,752 - numexpr.utils - INFO - Note: NumExpr detected 12 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+2025-08-01 10:46:28,752 - numexpr.utils - INFO - NumExpr defaulting to 8 threads.
+2025-08-01 10:46:29,787 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-01 10:46:39,093 - backend.models.embedding_manager - INFO - HuggingFace embeddings initialized: all-MiniLM-L6-v2
+2025-08-01 10:46:39,094 - backend.retrieval.rag_pipeline - INFO - Successfully processed file: ml_potentials.txt
+2025-08-01 10:46:39,094 - backend.retrieval.rag_pipeline - INFO - Split 1 documents into 2 chunks
+2025-08-01 10:46:39,354 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-08-01 10:46:39,960 - backend.retrieval.rag_pipeline - INFO - Created new vector store
+2025-08-01 10:46:39,960 - backend.retrieval.rag_pipeline - INFO - Processed 1/1 files successfully
+2025-08-01 10:46:39,960 - backend.retrieval.enhanced_rag_pipeline - INFO - Successfully processed file: ml_potentials.txt
+2025-08-01 10:46:39,961 - backend.retrieval.enhanced_rag_pipeline - INFO - Split 1 documents into 0 chunks
+2025-08-01 10:46:39,966 - backend.api.main - ERROR - Error uploading files: Expected Embeddings to be non-empty list or numpy array, got [] in upsert.
+2025-08-01 10:46:55,811 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:46:55,823 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:46:55,823 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:46:55,823 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:46:55,823 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:46:55,823 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:46:55,824 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:47:03,001 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:47:03,028 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:47:03,028 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:47:03,028 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:47:03,028 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:47:03,028 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:47:03,028 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:47:10,009 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:47:10,029 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:47:10,030 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:47:10,030 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:47:10,035 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:47:10,035 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:47:10,035 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:47:14,955 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:47:14,987 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:47:14,987 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:47:14,988 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:47:14,988 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:47:14,988 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:47:14,988 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:47:15,019 - backend.api.main - INFO - Uploading 1 files
+2025-08-01 10:47:15,019 - backend.models.embedding_manager - INFO - Initializing embedding model (first time only)...
+2025-08-01 10:47:22,359 - numexpr.utils - INFO - Note: NumExpr detected 12 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+2025-08-01 10:47:22,360 - numexpr.utils - INFO - NumExpr defaulting to 8 threads.
+2025-08-01 10:47:23,430 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-01 10:47:25,433 - backend.models.embedding_manager - INFO - HuggingFace embeddings initialized: all-MiniLM-L6-v2
+2025-08-01 10:47:25,434 - backend.retrieval.rag_pipeline - INFO - Successfully processed file: ml_potentials.txt
+2025-08-01 10:47:25,434 - backend.retrieval.rag_pipeline - INFO - Split 1 documents into 2 chunks
+2025-08-01 10:47:25,681 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-08-01 10:47:26,234 - backend.retrieval.rag_pipeline - INFO - Created new vector store
+2025-08-01 10:47:26,234 - backend.retrieval.rag_pipeline - INFO - Processed 1/1 files successfully
+2025-08-01 10:47:26,234 - backend.retrieval.enhanced_rag_pipeline - INFO - Successfully processed file: ml_potentials.txt
+2025-08-01 10:47:26,234 - backend.retrieval.enhanced_rag_pipeline - INFO - Split 1 documents into 0 valid chunks (filtered from 0 total)
+2025-08-01 10:47:26,234 - backend.retrieval.enhanced_rag_pipeline - WARNING - No valid chunks after filtering - documents may be too short or empty
+2025-08-01 10:47:26,234 - backend.retrieval.enhanced_rag_pipeline - INFO - Processed 1/1 files successfully
+2025-08-01 10:47:26,240 - backend.api.main - INFO - Processing query for session 10fa5a3b-697e-457c-a9bd-339b54f072f5: What are machine learning interatomic potentials?...
+2025-08-01 10:47:26,987 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:27,621 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:28,549 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:28,550 - backend.retrieval.rag_pipeline - INFO - RAG query processed successfully
+2025-08-01 10:47:28,550 - backend.api.main - INFO - Using original RAG pipeline (fallback)
+2025-08-01 10:47:28,553 - backend.api.main - INFO - Query processed successfully in 2.31s
+2025-08-01 10:47:29,560 - backend.api.main - INFO - Processing query for session df719c4d-c210-4692-94a2-2f4b5915693c: How do ML potentials compare to DFT calculations?...
+2025-08-01 10:47:30,323 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:30,898 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:31,398 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:31,398 - backend.retrieval.rag_pipeline - INFO - RAG query processed successfully
+2025-08-01 10:47:31,398 - backend.api.main - INFO - Using original RAG pipeline (fallback)
+2025-08-01 10:47:31,399 - backend.api.main - INFO - Query processed successfully in 1.84s
+2025-08-01 10:47:32,418 - backend.api.main - INFO - Processing query for session b6112baa-dd91-4ff0-805f-0e30f37488a9: What are the applications of ML potentials in materials science?...
+2025-08-01 10:47:33,074 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:33,435 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:33,548 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:47:33,548 - groq._base_client - INFO - Retrying request to /openai/v1/chat/completions in 2.000000 seconds
+2025-08-01 10:47:36,045 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:36,048 - backend.retrieval.rag_pipeline - INFO - RAG query processed successfully
+2025-08-01 10:47:36,048 - backend.api.main - INFO - Using original RAG pipeline (fallback)
+2025-08-01 10:47:36,050 - backend.api.main - INFO - Query processed successfully in 3.63s
+2025-08-01 10:47:37,061 - backend.api.main - INFO - Processing query for session da7febe6-6c11-4ec0-8d57-5fd6c22d69ea: Explain the training process for ML potentials...
+2025-08-01 10:47:37,781 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:37,896 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:47:37,896 - groq._base_client - INFO - Retrying request to /openai/v1/chat/completions in 1.000000 seconds
+2025-08-01 10:47:39,340 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:39,470 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:47:39,470 - groq._base_client - INFO - Retrying request to /openai/v1/chat/completions in 18.000000 seconds
+2025-08-01 10:47:58,110 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:47:58,129 - backend.retrieval.rag_pipeline - INFO - RAG query processed successfully
+2025-08-01 10:47:58,130 - backend.api.main - INFO - Using original RAG pipeline (fallback)
+2025-08-01 10:47:58,135 - backend.api.main - INFO - Query processed successfully in 21.07s
+2025-08-01 10:48:13,051 - backend.api.main - INFO - Processing query for session 11d8d5b5-def2-43c6-81c1-24f8c5e16790: What are machine learning interatomic potentials?...
+2025-08-01 10:48:13,586 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:48:14,157 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:48:14,250 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-08-01 10:48:14,250 - groq._base_client - INFO - Retrying request to /openai/v1/chat/completions in 5.000000 seconds
+2025-08-01 10:48:19,853 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-08-01 10:48:19,855 - backend.retrieval.rag_pipeline - INFO - RAG query processed successfully
+2025-08-01 10:48:19,855 - backend.api.main - INFO - Using original RAG pipeline (fallback)
+2025-08-01 10:48:19,856 - backend.api.main - INFO - Query processed successfully in 6.80s
+2025-08-01 10:48:50,581 - backend.models.llm_manager - INFO - Active model changed to: Llama-3.1-8B
+2025-08-01 10:49:03,033 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-01 10:49:03,044 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-01 10:49:03,044 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-01 10:49:03,044 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-01 10:49:03,044 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-01 10:49:03,045 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-01 10:49:03,045 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-01 10:49:05,466 - backend.models.llm_manager - INFO - Active model changed to: Llama-3.1-8B
+2025-08-01 10:49:07,719 - backend.models.llm_manager - INFO - Active model changed to: Mistral-7B
+2025-08-01 10:49:13,539 - backend.api.main - INFO - Uploading 1 files
+2025-08-01 10:49:13,539 - backend.models.embedding_manager - INFO - Initializing embedding model (first time only)...
+2025-08-01 10:49:20,968 - numexpr.utils - INFO - Note: NumExpr detected 12 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+2025-08-01 10:49:20,968 - numexpr.utils - INFO - NumExpr defaulting to 8 threads.
+2025-08-01 10:49:22,084 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-01 10:49:24,194 - backend.models.embedding_manager - INFO - HuggingFace embeddings initialized: all-MiniLM-L6-v2
+2025-08-01 10:49:24,906 - backend.retrieval.rag_pipeline - INFO - Successfully processed file: Machine-Learning-Based Interatomic Potentials for Group IIB to VIA Semiconductors- Towards a Universal Model.pdf
+2025-08-01 10:49:24,907 - backend.retrieval.rag_pipeline - INFO - Split 32 documents into 114 chunks
+2025-08-01 10:49:25,354 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-08-01 10:52:40,586 - backend.retrieval.rag_pipeline - INFO - Created new vector store
+2025-08-01 10:52:40,590 - backend.retrieval.rag_pipeline - INFO - Processed 1/1 files successfully
+2025-08-01 10:52:40,593 - backend.retrieval.enhanced_rag_pipeline - ERROR - Error processing file Machine-Learning-Based Interatomic Potentials for Group IIB to VIA Semiconductors- Towards a Universal Model.pdf: Cannot read an empty file
+2025-08-01 10:52:40,593 - backend.retrieval.enhanced_rag_pipeline - INFO - Processed 0/1 files successfully
+2025-08-01 10:52:40,602 - backend.api.main - INFO - Processing query for session 5c67036b-ab5e-48bf-84de-d91f6088dc12: Please give me a summary of machine learning interatomic potential based on the file I uploaded...
+2025-08-01 10:52:41,013 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-08-01 10:52:41,014 - backend.retrieval.rag_pipeline - ERROR - Error in RAG query: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-08-01 10:52:41,014 - backend.api.main - ERROR - Error processing query: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-08-01 10:53:36,871 - backend.api.main - INFO - Processing query for session 68de14e4-8685-4376-ba27-e0635ec34ff8: Please give me a summary of machine learning interatomic potential based on the file I uploaded...
+2025-08-01 10:53:37,169 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-08-01 10:53:37,184 - backend.retrieval.rag_pipeline - ERROR - Error in RAG query: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-08-01 10:53:37,184 - backend.api.main - ERROR - Error processing query: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2025-08-03 13:59:39,919 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 13:59:39,930 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 13:59:39,930 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 13:59:39,930 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 13:59:39,930 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 13:59:39,930 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 13:59:39,936 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 13:59:40,698 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 13:59:40,712 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 13:59:40,712 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 13:59:40,713 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 13:59:40,713 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 13:59:40,713 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 13:59:40,714 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:00:04,992 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:00:05,006 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:00:05,007 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:00:05,007 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:00:05,007 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:00:05,007 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:00:05,007 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:00:05,831 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:00:05,844 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:00:05,844 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:00:05,844 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:00:05,844 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:00:05,844 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:00:05,845 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:00:32,207 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:00:32,224 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:00:32,224 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:00:32,224 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:00:32,225 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:00:32,225 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:00:32,226 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:00:33,051 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:00:33,072 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:00:33,072 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:00:33,072 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:00:33,072 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:00:33,072 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:00:33,072 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:01:13,033 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:01:13,047 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:01:13,048 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:01:13,048 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:01:13,048 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:01:13,048 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:01:13,048 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:01:13,818 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:01:13,828 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:01:13,829 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:01:13,829 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:01:13,829 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:01:13,829 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:01:13,829 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:01:49,465 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:01:49,485 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:01:49,485 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:01:49,485 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:01:49,485 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:01:49,485 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:01:49,487 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:01:50,267 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:01:50,300 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:01:50,300 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:01:50,300 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:01:50,300 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:01:50,300 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:01:50,301 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:02:09,026 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:02:09,037 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:02:09,037 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:02:09,037 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:02:09,037 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:02:09,037 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:02:09,038 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:02:40,009 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:02:40,030 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:02:40,030 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:02:40,031 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:02:40,031 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:02:40,031 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:02:40,031 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:02:40,802 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:02:40,836 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:02:40,836 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:02:40,836 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:02:40,836 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:02:40,836 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:02:40,836 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:03:04,978 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:03:04,994 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:03:04,994 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:03:04,994 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:03:04,994 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:03:04,994 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:03:04,995 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:03:05,788 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:03:05,803 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:03:05,804 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:03:05,804 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:03:05,804 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:03:05,804 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:03:05,804 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:03:29,041 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:03:29,053 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:03:29,053 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:03:29,053 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:03:29,053 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:03:29,053 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:03:29,054 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:03:29,892 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:03:29,915 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:03:29,915 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:03:29,915 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:03:29,915 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:03:29,915 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:03:29,916 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db
+2025-08-03 14:04:31,726 - backend.models.llm_manager - INFO - Llama-3.1-8B initialized successfully
+2025-08-03 14:04:31,743 - backend.models.llm_manager - INFO - Mistral-7B initialized successfully
+2025-08-03 14:04:31,743 - backend.models.llm_manager - INFO - ResearchMate-Mistral-7B: Placeholder for fine-tuned model (Phase 2/3)
+2025-08-03 14:04:31,743 - backend.models.llm_manager - INFO - Active model set to: Llama-3.1-8B
+2025-08-03 14:04:31,743 - backend.retrieval.rag_pipeline - INFO - RAG Pipeline initialized
+2025-08-03 14:04:31,743 - backend.retrieval.enhanced_rag_pipeline - INFO - Enhanced RAG Pipeline initialized with hybrid search capabilities
+2025-08-03 14:04:31,744 - backend.evaluation.metrics - INFO - Metrics logger initialized with database: logs/metrics.db

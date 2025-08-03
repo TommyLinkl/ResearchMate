@@ -1,0 +1,20 @@
+# LoRA Configuration for ResearchMate-Mistral-7B
+model:
+  base_model: "mistralai/Mistral-7B-Instruct-v0.1"
+  model_max_length: 2048
+  
+# LoRA parameters
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.1
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  
+# Quantization (for QLoRA)
+quantization:
+  use_4bit: true
+  bnb_4bit_compute_dtype: "float16"
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_use_double_quant: true

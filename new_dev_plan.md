@@ -63,31 +63,38 @@ The existing codebase already implements:
 ---
 
 ## Phase 2: Advanced RAG Pipeline Enhancement
-**Status**: 🔄 Upgrade Existing Implementation
+**Status**: Upgrade Existing Implementation
+**Timeline**: 1-2 weeks
+**Success Metrics**: 20% improvement in answer relevance, 15% better citation accuracy
 
 ### Current vs. Target Architecture
 **Current**: Simple retrieval → LLM generation
 **Target**: Multi-stage pipeline with reranking and verification
 
 ### Enhancement Roadmap
-1. **Retrieval Improvements**
+1. **Retrieval Improvements** (Week 1)
    - Implement hybrid search (semantic + keyword)
    - Add query expansion and reformulation
    - Multiple embedding strategies (dense + sparse)
+   - **Metric**: Increase retrieval recall@5 from baseline
 
-2. **Reranking Layer**
+2. **Reranking Layer** (Week 1-2)
    - Cross-encoder reranking for relevance scoring
    - Source quality assessment
    - Temporal relevance weighting
+   - **Metric**: Improve precision@3 by 15%
 
-3. **Generation Enhancement**
+3. **Generation Enhancement** (Week 2)
    - Chain-of-thought prompting for complex queries
    - Few-shot examples for domain-specific formats
    - Citation verification and formatting
+   - **Metric**: Reduce hallucination rate by 25%
 
-4. **Integration Preparation**
+4. **Integration Preparation** (Week 2)
    - Prepare architecture for future fine-tuned model integration
    - Implement model selection and fallback logic
+   - A/B testing framework for comparing enhancements
+   - **Metric**: Seamless model switching with <200ms overhead
 
 ---
 
@@ -95,24 +102,78 @@ The existing codebase already implements:
 **Goal**: Create ResearchMate-Mistral-7B, a physics-specialized model that outperforms general-purpose LLMs on scientific queries.
 
 ### Target Model: ResearchMate-Mistral-7B with LoRA
-- **Base Model**: Mistral-7B-Instruct-v0.1
-- **Fine-tuning Method**: Low-Rank Adaptation (LoRA)
+- **Base Model**: Mistral-7B
+- **Fine-tuning Method**: Low-Rank Adaptation (LoRA) or QLoRA
 - **Target Domain**: Physics (condensed matter, quantum physics, statistical physics, quantum computing)
 - **Integration**: Will replace the placeholder in the LLM manager as the default model
 
-### Dataset Curation Strategy
-1. **Public Scientific Datasets**
-   - SciQA (Science Question Answering)
-   - MathInstruct (Mathematical reasoning)
-   - PubMedQA (Biomedical/physics overlap)
-   - ArXiv paper abstracts + conclusions
+### Architecture
+I use a hybrid approach that separates training infrastructure from the production codebase. I will create a dedicated training directory. 
 
-2. **Synthetic Data Generation**
-   - Use GPT-4 to generate physics Q&A pairs from research papers
-   - Create instruction-following examples with source attribution
-   - Generate domain-specific summarization tasks
+  ResearchMate/
+  ├── backend/           # Production API (current)
+  ├── frontend/          # Web interface (current)
+  ├── training/          # NEW: Fine-tuning pipeline
+  │   ├── data/
+  │   │   ├── raw/        # Downloaded datasets (Stack Exchange, ArXiv)
+  │   │   ├── processed/  # Cleaned, formatted training data
+  │   │   └── evaluation/ # Test sets for benchmarking
+  │   ├── scripts/
+  │   │   ├── data_preparation.py    # Automated data processing
+  │   │   ├── train_lora.py         # LoRA training script
+  │   │   ├── evaluate_model.py     # Model comparison & metrics
+  │   │   └── baseline_eval.py      # Pre-training benchmarks
+  │   ├── utils/
+  │   │   ├── preprocessing.py      # Shared data processing functions
+  │   │   ├── metrics.py           # Evaluation utilities
+  │   │   └── model_utils.py       # Model loading/saving helpers
+  │   ├── evaluation/
+  │   │   ├── benchmarks.py        # Physics Q&A test sets
+  │   │   └── comparison.py        # Base vs fine-tuned comparison
+  │   ├── configs/
+  │   │   ├── lora_config.yaml     # LoRA hyperparameters
+  │   │   ├── training_params.yaml # Training configuration
+  │   │   └── data_config.yaml     # Dataset processing settings
+  │   └── models/         # Training checkpoints and logs
+  └── fine_tuned_models/  # Final LoRA adapters
+      └── ResearchMate-Mistral-7B/
+          ├── adapter_config.json
+          ├── adapter_model.safetensors  # ← Final deliverable
+          └── training_metrics.json
 
-3. **Data Format**
+
+### Final Deliverables:
+  1. ✅ LoRA Adapter Files:
+    - adapter_model.safetensors (~10-50MB vs 14GB full model)
+    - adapter_config.json (configuration)
+  2. 📊 Training Artifacts:
+    - Training metrics and evaluation results
+    - Dataset preparation scripts
+    - Model comparison benchmarks
+  3. 🔗 Integration Code:
+    - Updated llm_manager.py to load the fine-tuned model
+    - Configuration for switching between base and fine-tuned models
+
+### Dataset Curation Strategy - Minimal Time Investment
+**Goal**: 5K-10K high-quality examples (sufficient for LoRA fine-tuning)
+
+1. **Primary Dataset**: Physics Stack Exchange Q&A
+   - Pre-processed, readily available
+   - High-quality community-verified answers
+   - Natural question-answer format
+   - Estimated: 3K-5K examples
+
+2. **Secondary Dataset**: ArXiv Physics Papers → Auto-Generated Q&A
+   - Automated extraction from abstracts/conclusions
+   - Focus on condensed matter, quantum physics papers
+   - Use existing LLM to generate Q&A pairs
+   - Estimated: 2K-3K examples
+
+3. **Optional Enhancement**: SciQA Physics Subset
+   - Small curated subset (~1K examples)
+   - Only if additional domain coverage needed
+
+4. **Data Format**
    ```json
    {
      "instruction": "Explain topological insulators with citations",
@@ -121,11 +182,36 @@ The existing codebase already implements:
    }
    ```
 
+**Time Investment**: 1-2 days for automated data preparation vs. weeks of manual curation
+
 ### Implementation Plan
-- Use Hugging Face `transformers` + `peft` for LoRA training
-- Track metrics: training loss, validation perplexity, domain-specific accuracy
-- Compare performance against base model on physics Q&A benchmarks
-- Integrate fine-tuned model into Phase 2 RAG pipeline
+**Sequential Approach (Risk-Mitigated):**
+1. **Baseline Evaluation Setup** (Day 1)
+   - Establish baseline metrics with Mistral-7B on physics Q&A
+   - Create evaluation framework before training
+   - Define success criteria: >10% improvement on domain tasks
+
+2. **Data Preparation Pipeline** (Day 1-2)
+   - Automated processing of Stack Exchange data
+   - ArXiv abstract extraction and Q&A generation
+   - Quality filtering and format standardization
+
+3. **LoRA Training with Checkpoints** (Day 2-3)
+   - Use Hugging Face `transformers` + `peft` for LoRA training
+   - QLoRA for memory efficiency (4-bit quantization)
+   - Save checkpoints every 500 steps for early stopping
+   - Track metrics: training loss, validation perplexity, domain-specific accuracy
+
+4. **Model Comparison & Integration** (Day 3-4)
+   - Compare performance against base model on physics Q&A benchmarks
+   - Gradual rollout: A/B test fine-tuned vs base model
+   - Integrate into Phase 2 RAG pipeline with fallback logic
+
+### Risk Mitigation & Fallback Plans
+- **If fine-tuning doesn't improve performance**: Use base Mistral-7B with enhanced prompting
+- **If memory constraints occur**: Switch to QLoRA or smaller LoRA rank
+- **If training stalls**: Resume from last checkpoint or reduce learning rate
+- **If integration issues arise**: Maintain parallel deployment until stability confirmed
 
 ---
 

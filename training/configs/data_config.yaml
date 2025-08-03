@@ -1,0 +1,33 @@
+# Data Configuration for ResearchMate Fine-tuning
+data:
+  # Dataset sources
+  physics_stackexchange:
+    url: "https://archive.org/download/stackexchange/physics.stackexchange.com.7z"
+    target_size: 5000
+    min_score: 5
+    min_answer_length: 100
+    
+  arxiv_physics:
+    categories: ["cond-mat", "quant-ph", "physics"]
+    target_size: 3000
+    date_range: "2020-2024"
+    
+  # Data processing
+  processing:
+    max_length: 2048
+    train_split: 0.9
+    val_split: 0.1
+    seed: 42
+    
+  # Quality filters
+  filters:
+    min_instruction_length: 10
+    max_instruction_length: 500
+    min_output_length: 50
+    max_output_length: 1500
+    
+# Output paths
+paths:
+  raw_data: "training/data/raw"
+  processed_data: "training/data/processed"
+  evaluation_data: "training/data/evaluation"

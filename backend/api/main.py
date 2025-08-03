@@ -12,6 +12,7 @@ import uuid
 from ..models.llm_manager import LLMManager
 from ..models.embedding_manager import EmbeddingManager
 from ..retrieval.rag_pipeline import RAGPipeline
+from ..retrieval.enhanced_rag_pipeline import EnhancedRAGPipeline
 from ..evaluation.metrics import MetricsLogger
 
 # Configure logging with proper path handling
@@ -57,8 +58,12 @@ else:
 # Initialize managers
 llm_manager = LLMManager()
 embedding_manager = EmbeddingManager()
-rag_pipeline = RAGPipeline()
+rag_pipeline = RAGPipeline()  # Original pipeline (fallback)
+enhanced_rag_pipeline = EnhancedRAGPipeline()  # Phase 2 enhanced pipeline
 metrics_logger = MetricsLogger()
+
+# Configuration flag for enhanced features
+USE_ENHANCED_RAG = True  # Can be controlled via environment variable
 
 # Pydantic models
 class QueryRequest(BaseModel):
@@ -66,6 +71,11 @@ class QueryRequest(BaseModel):
     llm_model: Optional[str] = "GPT-3.5 Turbo"
     use_retrieval: bool = True
     session_id: Optional[str] = None
+    # Phase 2 Enhanced RAG options
+    use_enhanced_rag: Optional[bool] = True
+    enable_query_expansion: Optional[bool] = True
+    enable_reranking: Optional[bool] = True
+    use_chain_of_thought: Optional[bool] = True
 
 class QueryResponse(BaseModel):
     model_config = {'protected_namespaces': ()}
@@ -76,6 +86,11 @@ class QueryResponse(BaseModel):
     response_time: float
     session_id: str
     timestamp: datetime
+    # Phase 2 Enhanced RAG metadata
+    enhanced_rag_used: Optional[bool] = False
+    retrieved_docs_count: Optional[int] = None
+    query_expanded: Optional[bool] = False
+    reranked: Optional[bool] = False
 
 class ModelInfo(BaseModel):
     model_config = {'protected_namespaces': ()}
@@ -146,11 +161,52 @@ async def process_query(request: QueryRequest):
         # Get the LLM
         llm = llm_manager.get_llm(request.llm_model)
         
-        if request.use_retrieval and rag_pipeline.has_documents():
-            # Use RAG pipeline
-            result = rag_pipeline.query(request.query, llm)
-            answer = result.get('answer', 'No answer provided')
-            sources = result.get('sources', [])
+        # Initialize response metadata
+        enhanced_rag_used = False
+        retrieved_docs_count = None
+        query_expanded = False
+        reranked = False
+        
+        if request.use_retrieval:
+            # Determine which RAG pipeline to use
+            use_enhanced = (USE_ENHANCED_RAG and 
+                          request.use_enhanced_rag and 
+                          enhanced_rag_pipeline.has_documents())
+            
+            if use_enhanced:
+                # Configure enhanced pipeline options
+                enhanced_rag_pipeline.toggle_query_expansion(request.enable_query_expansion)
+                enhanced_rag_pipeline.toggle_reranking(request.enable_reranking)
+                
+                # Use Enhanced RAG pipeline (Phase 2)
+                result = enhanced_rag_pipeline.query(
+                    request.query, 
+                    llm, 
+                    use_enhanced_generation=request.use_chain_of_thought
+                )
+                answer = result.get('answer', 'No answer provided')
+                sources = result.get('sources', [])
+                
+                # Extract enhanced metadata
+                enhanced_rag_used = True
+                retrieved_docs_count = result.get('retrieved_docs_count')
+                query_expanded = result.get('query_expanded', False)
+                reranked = result.get('reranked', False)
+                
+                logger.info(f"Enhanced RAG used: docs={retrieved_docs_count}, expanded={query_expanded}, reranked={reranked}")
+                
+            elif rag_pipeline.has_documents():
+                # Fallback to original RAG pipeline
+                result = rag_pipeline.query(request.query, llm)
+                answer = result.get('answer', 'No answer provided')
+                sources = result.get('sources', [])
+                
+                logger.info("Using original RAG pipeline (fallback)")
+            
+            else:
+                # No documents available
+                answer = "I don't have any documents to search through. Please upload some documents first and try again."
+                sources = []
         else:
             # Direct LLM query
             answer = llm_manager.run_llm(request.query, llm)
@@ -164,7 +220,12 @@ async def process_query(request: QueryRequest):
             model_used=request.llm_model,
             response_time=response_time,
             session_id=session_id,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
+            # Enhanced RAG metadata
+            enhanced_rag_used=enhanced_rag_used,
+            retrieved_docs_count=retrieved_docs_count,
+            query_expanded=query_expanded,
+            reranked=reranked
         )
         
         # Log the interaction
@@ -192,13 +253,17 @@ async def upload_files(files: List[UploadFile] = File(...)):
         # Get embeddings
         embeddings = embedding_manager.get_embeddings()
         
-        # Process files
-        processed_count = rag_pipeline.add_files(files, embeddings)
+        # Process files in both pipelines (sync them)
+        processed_count_original = rag_pipeline.add_files(files, embeddings)
+        processed_count_enhanced = enhanced_rag_pipeline.add_files(files, embeddings)
+        
+        processed_count = max(processed_count_original, processed_count_enhanced)
         
         return {
             "message": f"Successfully processed {processed_count} files",
             "files_processed": processed_count,
-            "total_documents": rag_pipeline.get_document_count()
+            "total_documents": enhanced_rag_pipeline.get_document_count(),
+            "enhanced_rag_ready": USE_ENHANCED_RAG
         }
         
     except Exception as e:
@@ -214,13 +279,17 @@ async def upload_urls(urls: List[str] = Form(...)):
         # Get embeddings
         embeddings = embedding_manager.get_embeddings()
         
-        # Process URLs
-        processed_count = rag_pipeline.add_urls(urls, embeddings)
+        # Process URLs in both pipelines (sync them)
+        processed_count_original = rag_pipeline.add_urls(urls, embeddings)
+        processed_count_enhanced = enhanced_rag_pipeline.add_urls(urls, embeddings)
+        
+        processed_count = max(processed_count_original, processed_count_enhanced)
         
         return {
             "message": f"Successfully processed {processed_count} URLs",
             "urls_processed": processed_count,
-            "total_documents": rag_pipeline.get_document_count()
+            "total_documents": enhanced_rag_pipeline.get_document_count(),
+            "enhanced_rag_ready": USE_ENHANCED_RAG
         }
         
     except Exception as e:
@@ -256,18 +325,63 @@ async def get_stats():
     """Get system statistics"""
     return {
         "total_queries": metrics_logger.get_query_count(),
-        "total_documents": rag_pipeline.get_document_count(),
+        "total_documents": enhanced_rag_pipeline.get_document_count(),
         "active_model": llm_manager.get_active_model(),
         "embedding_model": embedding_manager.get_model_info()["name"],
-        "average_response_time": metrics_logger.get_average_response_time()
+        "average_response_time": metrics_logger.get_average_response_time(),
+        # Phase 2 enhancements
+        "enhanced_rag_enabled": USE_ENHANCED_RAG,
+        "pipeline_version": "2.0-enhanced" if USE_ENHANCED_RAG else "1.0-basic"
     }
+
+@app.get("/api/enhanced-rag/config")
+async def get_enhanced_rag_config():
+    """Get current enhanced RAG configuration"""
+    return {
+        "enhanced_rag_enabled": USE_ENHANCED_RAG,
+        "query_expansion_enabled": enhanced_rag_pipeline.query_expansion_enabled,
+        "reranking_enabled": enhanced_rag_pipeline.reranking_enabled,
+        "features": {
+            "hybrid_search": "Semantic + BM25 keyword search",
+            "query_expansion": "Automatic query expansion with synonyms and variations",
+            "reranking": "Multi-factor document reranking (BM25, exact match, source quality, length)",
+            "chain_of_thought": "Enhanced prompting with step-by-step reasoning"
+        },
+        "pipeline_version": "2.0-enhanced"
+    }
+
+@app.post("/api/enhanced-rag/config")
+async def update_enhanced_rag_config(
+    query_expansion: Optional[bool] = None,
+    reranking: Optional[bool] = None
+):
+    """Update enhanced RAG configuration"""
+    try:
+        if query_expansion is not None:
+            enhanced_rag_pipeline.toggle_query_expansion(query_expansion)
+        
+        if reranking is not None:
+            enhanced_rag_pipeline.toggle_reranking(reranking)
+        
+        return {
+            "message": "Enhanced RAG configuration updated",
+            "query_expansion_enabled": enhanced_rag_pipeline.query_expansion_enabled,
+            "reranking_enabled": enhanced_rag_pipeline.reranking_enabled
+        }
+    except Exception as e:
+        logger.error(f"Error updating enhanced RAG config: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error updating configuration: {str(e)}")
 
 @app.delete("/api/documents")
 async def clear_documents():
     """Clear all uploaded documents"""
     try:
         rag_pipeline.clear_documents()
-        return {"message": "All documents cleared successfully"}
+        enhanced_rag_pipeline.clear_documents()
+        return {
+            "message": "All documents cleared successfully from both pipelines",
+            "pipelines_cleared": ["basic", "enhanced"]
+        }
     except Exception as e:
         logger.error(f"Error clearing documents: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error clearing documents: {str(e)}")

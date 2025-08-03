@@ -24,5 +24,9 @@ torch
 pypdf
 numpy
 
+# Phase 2 Enhanced RAG dependencies
+rank-bm25
+scikit-learn
+
 # Optional: Keep panel for legacy support if needed
 panel
