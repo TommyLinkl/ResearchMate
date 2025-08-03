@@ -3,6 +3,10 @@ Model utilities for loading, saving, and managing models
 """
 import os
 import torch
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 from transformers import (
     AutoModelForCausalLM, 
     AutoTokenizer, 

@@ -26,8 +26,18 @@ from utils.preprocessing import (
     save_dataset, split_dataset, get_dataset_stats
 )
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s:%(message)s')
 logger = logging.getLogger(__name__)
+
+# Enable debug logging for ArXiv specifically
+def enable_debug_logging():
+    """Enable debug logging to help troubleshoot ArXiv issues"""
+    import os
+    if os.getenv('DEBUG_ARXIV', '').lower() in ('1', 'true', 'yes'):
+        logging.getLogger(__name__).setLevel(logging.DEBUG)
+        logger.info("Debug logging enabled for ArXiv fetching")
+
+enable_debug_logging()
 
 class PhysicsStackExchangeProcessor:
     """Process Physics Stack Exchange data"""
@@ -186,6 +196,20 @@ class ArXivProcessor:
         start_year, end_year = map(int, date_range.split('-'))
         papers_per_category = target_size // len(categories)
         
+        logger.info(f"Target: {target_size} total papers ({papers_per_category} per category)")
+        logger.info(f"Categories: {categories}")
+        logger.info(f"Date range: {start_year}-{end_year}")
+        
+        # Test ArXiv API connectivity
+        logger.info("Testing ArXiv API connectivity...")
+        try:
+            test_response = requests.get("https://export.arxiv.org/api/query?search_query=physics&max_results=1", timeout=10)
+            test_response.raise_for_status()
+            logger.info("ArXiv API is reachable")
+        except Exception as e:
+            logger.error(f"ArXiv API connectivity test failed: {e}")
+            logger.error("This might explain why no papers are being fetched")
+        
         # Try arxiv library first (more reliable)
         try:
             papers = self._fetch_with_arxiv_library(categories, papers_per_category, start_year, end_year)
@@ -206,11 +230,9 @@ class ArXivProcessor:
         except Exception as e:
             logger.warning(f"Feedparser approach failed: {e}")
         
-        # Final fallback: create sample data
-        logger.warning("All ArXiv fetching methods failed. Creating sample data...")
-        papers = self._create_sample_arxiv_data()
-        self._save_papers(papers)
-        return papers
+        # Final fallback: return empty list and let caller handle
+        logger.error("All ArXiv fetching methods failed. No papers retrieved.")
+        return []
     
     def _fetch_with_arxiv_library(self, categories, papers_per_category, start_year, end_year):
         """Fetch papers using the arxiv library"""
@@ -223,41 +245,71 @@ class ArXivProcessor:
         papers = []
         
         for category in categories:
-            logger.info(f"Fetching papers from category {category} using arxiv library...")
+            logger.info(f"[arxiv-lib] Fetching papers from category: {category}")
+            logger.info(f"[arxiv-lib] Target: {papers_per_category} papers, date range: {start_year}-{end_year}")
             
             try:
-                # Create search query
-                search = arxiv.Search(
-                    query=f"cat:{category}",
-                    max_results=papers_per_category,
-                    sort_by=arxiv.SortCriterion.SubmittedDate,
-                    sort_order=arxiv.SortOrder.Descending
-                )
+                # Create search query - try different query formats
+                queries_to_try = [
+                    f"cat:{category}*",  # More permissive category match
+                    f"cat:{category}",   # Exact category match
+                    category            # Just the category name
+                ]
                 
                 category_papers = []
-                for result in search.results():
-                    # Check publication date
-                    published_year = result.published.year
-                    if start_year <= published_year <= end_year:
-                        paper = {
-                            'id': result.entry_id.split('/')[-1],
-                            'title': result.title.strip(),
-                            'abstract': result.summary.strip(),
-                            'authors': [str(author) for author in result.authors],
-                            'published': result.published.isoformat(),
-                            'categories': [str(cat) for cat in result.categories],
-                            'url': result.entry_id
-                        }
-                        category_papers.append(paper)
+                
+                for query in queries_to_try:
+                    if category_papers:  # If we already got papers, skip other queries
+                        break
                         
-                        if len(category_papers) >= papers_per_category:
-                            break
+                    logger.info(f"[arxiv-lib] Trying query: '{query}'")
+                    
+                    try:
+                        search = arxiv.Search(
+                            query=query,
+                            max_results=papers_per_category * 2,  # Get more to filter by date
+                            sort_by=arxiv.SortCriterion.SubmittedDate,
+                            sort_order=arxiv.SortOrder.Descending
+                        )
+                        
+                        results_count = 0
+                        for result in search.results():
+                            results_count += 1
+                            logger.debug(f"[arxiv-lib] Processing paper {results_count}: {result.title[:50]}...")
+                            
+                            # Check publication date
+                            published_year = result.published.year
+                            logger.debug(f"[arxiv-lib] Published year: {published_year}, target range: {start_year}-{end_year}")
+                            
+                            if start_year <= published_year <= end_year:
+                                paper = {
+                                    'id': result.entry_id.split('/')[-1],
+                                    'title': result.title.strip(),
+                                    'abstract': result.summary.strip(),
+                                    'authors': [str(author) for author in result.authors],
+                                    'published': result.published.isoformat(),
+                                    'categories': [str(cat) for cat in result.categories],
+                                    'url': result.entry_id
+                                }
+                                category_papers.append(paper)
+                                logger.debug(f"[arxiv-lib] Added paper: {paper['title'][:50]}...")
+                                
+                                if len(category_papers) >= papers_per_category:
+                                    break
+                        
+                        logger.info(f"[arxiv-lib] Query '{query}' returned {results_count} total results, {len(category_papers)} matched date filter")
+                        
+                    except Exception as query_e:
+                        logger.warning(f"[arxiv-lib] Query '{query}' failed: {query_e}")
+                        continue
                 
                 papers.extend(category_papers)
-                logger.info(f"Fetched {len(category_papers)} papers from {category}")
+                logger.info(f"[arxiv-lib] Successfully fetched {len(category_papers)} papers from {category}")
                 
             except Exception as e:
-                logger.warning(f"Failed to fetch {category} papers with arxiv library: {e}")
+                logger.error(f"[arxiv-lib] Failed to fetch {category} papers: {e}")
+                import traceback
+                logger.debug(traceback.format_exc())
         
         return papers
     
@@ -270,7 +322,7 @@ class ArXivProcessor:
             
             # Build search query
             search_query = f"cat:{category}"
-            base_url = "http://export.arxiv.org/api/query"
+            base_url = "https://export.arxiv.org/api/query"
             
             # Fetch papers in batches
             start = 0
@@ -293,32 +345,56 @@ class ArXivProcessor:
                     
                     # Parse the Atom feed
                     feed = feedparser.parse(response.content)
+                    logger.info(f"[feedparser] {category!r}: found {len(feed.entries)} entries")
                     
                     if not feed.entries:
                         logger.warning(f"No more papers found for category {category}")
                         break
                     
                     batch_added = 0
-                    for entry in feed.entries:
+                    
+                    # Debug: show feed status
+                    if hasattr(feed, 'status'):
+                        logger.info(f"[feedparser] Feed status: {feed.status}")
+                    if hasattr(feed, 'bozo') and feed.bozo:
+                        logger.warning(f"[feedparser] Feed parsing issues: {feed.bozo_exception}")
+                    
+                    for i, entry in enumerate(feed.entries):
                         try:
-                            published_year = int(entry.published[:4])
-                            if start_year <= published_year <= end_year:
-                                paper = {
-                                    'id': entry.id.split('/')[-1],
-                                    'title': entry.title.replace('\n', ' ').strip(),
-                                    'abstract': entry.summary.replace('\n', ' ').strip(),
-                                    'authors': [author.name for author in entry.authors],
-                                    'published': entry.published,
-                                    'categories': [tag.term for tag in entry.tags],
-                                    'url': entry.link
-                                }
-                                category_papers.append(paper)
-                                batch_added += 1
+                            logger.debug(f"[feedparser] Processing entry {i+1}: {getattr(entry, 'title', 'No title')[:50]}...")
+                            
+                            # Try to get published date
+                            published = getattr(entry, 'published', '')
+                            if not published:
+                                published = getattr(entry, 'updated', '')
+                            
+                            if published:
+                                published_year = int(published[:4])
+                                logger.debug(f"[feedparser] Published year: {published_year}, target: {start_year}-{end_year}")
                                 
-                                if len(category_papers) >= papers_per_category:
-                                    break
+                                if start_year <= published_year <= end_year:
+                                    paper = {
+                                        'id': entry.id.split('/')[-1] if hasattr(entry, 'id') else f"unknown-{i}",
+                                        'title': entry.title.replace('\n', ' ').strip() if hasattr(entry, 'title') else 'No title',
+                                        'abstract': entry.summary.replace('\n', ' ').strip() if hasattr(entry, 'summary') else 'No abstract',
+                                        'authors': [author.name for author in entry.authors] if hasattr(entry, 'authors') else ['Unknown'],
+                                        'published': published,
+                                        'categories': [tag.term for tag in entry.tags] if hasattr(entry, 'tags') else [category],
+                                        'url': entry.link if hasattr(entry, 'link') else 'No URL'
+                                    }
+                                    category_papers.append(paper)
+                                    batch_added += 1
+                                    logger.debug(f"[feedparser] Added paper: {paper['title'][:50]}...")
+                                    
+                                    if len(category_papers) >= papers_per_category:
+                                        break
+                                else:
+                                    logger.debug(f"[feedparser] Skipping paper from {published_year} (outside date range)")
+                            else:
+                                logger.debug(f"[feedparser] Skipping entry with no publication date")
+                                
                         except (ValueError, AttributeError) as e:
-                            logger.debug(f"Skipping paper due to parsing error: {e}")
+                            logger.debug(f"[feedparser] Skipping paper due to parsing error: {e}")
                             continue
                     
                     if batch_added == 0:
