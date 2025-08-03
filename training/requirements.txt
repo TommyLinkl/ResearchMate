@@ -23,8 +23,9 @@ pyyaml>=6.0
 tqdm>=4.65.0
 rich>=13.0.0
 
+# Data fetching and processing
+py7zr>=0.20.0
+feedparser>=6.0.0
+
 # Optional: For ArXiv API access
 arxiv>=1.4.0
-
-# Optional: For distributed training
-deepspeed>=0.12.0

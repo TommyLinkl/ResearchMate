@@ -12,6 +12,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 import argparse
 import logging
+import py7zr
+import time
+import feedparser
 from typing import List, Dict, Any
 
 # Add parent directory to path for imports
@@ -35,71 +38,129 @@ class PhysicsStackExchangeProcessor:
         self.processed_data_dir = Path(config['paths']['processed_data'])
         
     def download_stackexchange_data(self):
-        """Download Physics StackExchange dump (simulated - actual implementation would download)"""
-        logger.info("Physics StackExchange data download would happen here")
-        logger.info("For now, assuming data is manually placed in training/data/raw/")
+        """Download Physics StackExchange dump"""
+        logger.info("Downloading Physics StackExchange data...")
         
-        # Create placeholder structure for development
         self.raw_data_dir.mkdir(parents=True, exist_ok=True)
         
-        # Create sample data for testing
-        sample_data = [
-            {
-                "Id": "1",
-                "Title": "What is quantum entanglement?",
-                "Body": "Can someone explain quantum entanglement in simple terms?",
-                "AcceptedAnswerId": "2",
-                "Score": 15
-            },
-            {
-                "Id": "2",
-                "PostTypeId": "2",
-                "ParentId": "1",
-                "Body": "Quantum entanglement is a quantum mechanical phenomenon in which particles become correlated such that the quantum state of each particle cannot be described independently.",
-                "Score": 20
-            }
-        ]
+        # Download the 7z file
+        url = self.config['data']['physics_stackexchange']['url']
+        archive_path = self.raw_data_dir / "physics.stackexchange.com.7z"
         
-        sample_file = self.raw_data_dir / "sample_physics_qa.json"
-        with open(sample_file, 'w') as f:
-            json.dump(sample_data, f, indent=2)
+        if not archive_path.exists():
+            logger.info(f"Downloading {url}...")
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            
+            with open(archive_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            
+            logger.info("Download completed.")
         
-        logger.info(f"Sample data created at {sample_file}")
+        # Extract the archive
+        extract_dir = self.raw_data_dir / "physics_stackexchange"
+        if not extract_dir.exists():
+            logger.info("Extracting archive...")
+            with py7zr.SevenZipFile(archive_path, mode='r') as archive:
+                archive.extractall(path=extract_dir)
+            logger.info("Extraction completed.")
+        
+        return extract_dir
     
     def process_posts(self) -> List[Dict[str, str]]:
         """Process Physics StackExchange posts into Q&A format"""
         
         logger.info("Processing Physics StackExchange posts...")
         
-        # Load sample data (in real implementation, this would parse XML dump)
-        sample_file = self.raw_data_dir / "sample_physics_qa.json"
+        # Download and extract data if not present
+        extract_dir = self.raw_data_dir / "physics_stackexchange"
+        if not extract_dir.exists():
+            extract_dir = self.download_stackexchange_data()
         
-        if not sample_file.exists():
-            logger.warning("No StackExchange data found. Creating sample data...")
-            self.download_stackexchange_data()
+        # Parse Posts.xml file
+        posts_xml = extract_dir / "Posts.xml"
+        if not posts_xml.exists():
+            logger.error(f"Posts.xml not found in {extract_dir}")
+            return []
         
-        with open(sample_file, 'r') as f:
-            posts = json.load(f)
-        
-        # Process into Q&A format
+        logger.info("Parsing Posts.xml...")
         qa_pairs = []
-        questions = {p['Id']: p for p in posts if p.get('PostTypeId') != '2'}
-        answers = {p['ParentId']: p for p in posts if p.get('PostTypeId') == '2'}
+        questions = {}
+        answers = {}
         
-        for qid, question in questions.items():
-            if qid in answers:
-                answer = answers[qid]
+        # Parse XML incrementally to handle large files
+        for event, elem in ET.iterparse(posts_xml, events=('start', 'end')):
+            if event == 'end' and elem.tag == 'row':
+                post_type = elem.get('PostTypeId')
+                post_id = elem.get('Id')
+                score = int(elem.get('Score', 0))
                 
-                # Apply score filters
-                min_score = self.config['data']['physics_stackexchange']['min_score']
-                if question.get('Score', 0) >= min_score and answer.get('Score', 0) >= min_score:
+                if post_type == '1':  # Question
+                    title = elem.get('Title', '')
+                    body = elem.get('Body', '')
+                    accepted_answer_id = elem.get('AcceptedAnswerId')
                     
-                    qa_pair = format_physics_qa(
-                        question=question['Body'],
-                        answer=answer['Body'],
-                        title=question.get('Title')
-                    )
-                    qa_pairs.append(qa_pair)
+                    if score >= self.config['data']['physics_stackexchange']['min_score']:
+                        questions[post_id] = {
+                            'Id': post_id,
+                            'Title': title,
+                            'Body': body,
+                            'AcceptedAnswerId': accepted_answer_id,
+                            'Score': score
+                        }
+                
+                elif post_type == '2':  # Answer
+                    parent_id = elem.get('ParentId')
+                    body = elem.get('Body', '')
+                    
+                    if (score >= self.config['data']['physics_stackexchange']['min_score'] and 
+                        len(body) >= self.config['data']['physics_stackexchange']['min_answer_length']):
+                        if parent_id not in answers:
+                            answers[parent_id] = []
+                        answers[parent_id].append({
+                            'Id': post_id,
+                            'Body': body,
+                            'Score': score
+                        })
+                
+                # Clear element to save memory
+                elem.clear()
+        
+        # Match questions with their accepted answers
+        target_size = self.config['data']['physics_stackexchange']['target_size']
+        processed_count = 0
+        
+        for q_id, question in questions.items():
+            if processed_count >= target_size:
+                break
+                
+            # First try accepted answer
+            if question.get('AcceptedAnswerId') and question['AcceptedAnswerId'] in [a['Id'] for parent_answers in answers.values() for a in parent_answers]:
+                for parent_id, parent_answers in answers.items():
+                    if parent_id == q_id:
+                        for answer in parent_answers:
+                            if answer['Id'] == question['AcceptedAnswerId']:
+                                qa_pair = format_physics_qa(
+                                    question=question['Body'],
+                                    answer=answer['Body'],
+                                    title=question.get('Title')
+                                )
+                                qa_pairs.append(qa_pair)
+                                processed_count += 1
+                                break
+                        break
+            
+            # Otherwise use highest scored answer
+            elif q_id in answers:
+                best_answer = max(answers[q_id], key=lambda x: x['Score'])
+                qa_pair = format_physics_qa(
+                    question=question['Body'],
+                    answer=best_answer['Body'],
+                    title=question.get('Title')
+                )
+                qa_pairs.append(qa_pair)
+                processed_count += 1
         
         logger.info(f"Processed {len(qa_pairs)} Q&A pairs from StackExchange")
         return qa_pairs
@@ -112,40 +173,104 @@ class ArXivProcessor:
         self.raw_data_dir = Path(config['paths']['raw_data'])
         
     def fetch_arxiv_papers(self) -> List[Dict[str, str]]:
-        """Fetch ArXiv physics papers (simulated for development)"""
+        """Fetch ArXiv physics papers using ArXiv API"""
         
         logger.info("Fetching ArXiv physics papers...")
-        
-        # Create sample ArXiv data for testing
-        sample_papers = [
-            {
-                "title": "Topological Insulators and Superconductors",
-                "abstract": "Topological insulators are electronic materials that have a bulk band gap like an ordinary insulator but have protected conducting states on their edge or surface. These states are protected by time-reversal symmetry."
-            },
-            {
-                "title": "Quantum Computing with Trapped Ions",
-                "abstract": "Trapped atomic ions are among the most promising candidates for quantum information processing. We review the basic physics of ion trapping and discuss quantum gate operations."
-            },
-            {
-                "title": "Many-Body Localization in Disordered Systems",
-                "abstract": "Many-body localization represents a novel paradigm of ergodicity breaking in isolated quantum systems. We discuss the theoretical framework and experimental signatures."
-            }
-        ]
-        
-        # Save sample data
-        sample_file = self.raw_data_dir / "sample_arxiv_papers.json"
         self.raw_data_dir.mkdir(parents=True, exist_ok=True)
         
-        with open(sample_file, 'w') as f:
-            json.dump(sample_papers, f, indent=2)
+        papers = []
+        categories = self.config['data']['arxiv_physics']['categories']
+        target_size = self.config['data']['arxiv_physics']['target_size']
+        date_range = self.config['data']['arxiv_physics']['date_range']
         
-        logger.info(f"Sample ArXiv data created with {len(sample_papers)} papers")
-        return sample_papers
+        # Split date range
+        start_year, end_year = map(int, date_range.split('-'))
+        
+        papers_per_category = target_size // len(categories)
+        
+        for category in categories:
+            logger.info(f"Fetching papers from category: {category}")
+            
+            # Build search query
+            search_query = f"cat:{category}"
+            
+            # ArXiv API base URL
+            base_url = "http://export.arxiv.org/api/query"
+            
+            # Fetch papers in batches
+            start = 0
+            max_results = 100  # ArXiv API limit
+            category_papers = []
+            
+            while len(category_papers) < papers_per_category:
+                params = {
+                    'search_query': search_query,
+                    'start': start,
+                    'max_results': min(max_results, papers_per_category - len(category_papers)),
+                    'sortBy': 'submittedDate',
+                    'sortOrder': 'descending'
+                }
+                
+                try:
+                    response = requests.get(base_url, params=params)
+                    response.raise_for_status()
+                    
+                    # Parse the Atom feed
+                    feed = feedparser.parse(response.content)
+                    
+                    if not feed.entries:
+                        logger.warning(f"No more papers found for category {category}")
+                        break
+                    
+                    for entry in feed.entries:
+                        # Check publication date
+                        published_year = int(entry.published[:4])
+                        if start_year <= published_year <= end_year:
+                            paper = {
+                                'id': entry.id.split('/')[-1],
+                                'title': entry.title.replace('\n', ' ').strip(),
+                                'abstract': entry.summary.replace('\n', ' ').strip(),
+                                'authors': [author.name for author in entry.authors],
+                                'published': entry.published,
+                                'categories': [tag.term for tag in entry.tags],
+                                'url': entry.link
+                            }
+                            category_papers.append(paper)
+                            
+                            if len(category_papers) >= papers_per_category:
+                                break
+                    
+                    start += max_results
+                    time.sleep(0.5)  # Rate limiting
+                    
+                except requests.RequestException as e:
+                    logger.error(f"Error fetching ArXiv papers: {e}")
+                    break
+            
+            papers.extend(category_papers)
+            logger.info(f"Fetched {len(category_papers)} papers from {category}")
+        
+        # Save fetched data
+        arxiv_file = self.raw_data_dir / "arxiv_papers.json"
+        with open(arxiv_file, 'w', encoding='utf-8') as f:
+            json.dump(papers, f, indent=2, ensure_ascii=False)
+        
+        logger.info(f"Fetched {len(papers)} ArXiv papers total")
+        return papers
     
     def process_papers(self) -> List[Dict[str, str]]:
         """Process ArXiv papers into Q&A format"""
         
-        papers = self.fetch_arxiv_papers()
+        # Check if we already have fetched data
+        arxiv_file = self.raw_data_dir / "arxiv_papers.json"
+        
+        if arxiv_file.exists():
+            logger.info("Loading existing ArXiv data...")
+            with open(arxiv_file, 'r', encoding='utf-8') as f:
+                papers = json.load(f)
+        else:
+            papers = self.fetch_arxiv_papers()
+        
         qa_pairs = []
         
         for paper in papers:
