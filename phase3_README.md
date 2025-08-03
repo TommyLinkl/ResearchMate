@@ -63,9 +63,9 @@ training/
 │   ├── lora_config.yaml      # LoRA hyperparameters  
 │   └── training_params.yaml  # Training configuration
 ├── data/
-│   ├── raw/                  # Downloaded datasets
-│   ├── processed/            # Training-ready data
-│   └── evaluation/           # Test sets & results
+│   ├── raw/                  # Downloaded datasets (git ignored)
+│   ├── processed/            # Training-ready data (git ignored)
+│   └── evaluation/           # Test sets & results (git ignored)
 ├── scripts/
 │   ├── data_preparation.py   # Automated data processing
 │   ├── train_lora.py        # Main training script
@@ -78,9 +78,9 @@ training/
 ├── evaluation/
 │   ├── benchmarks.py       # Physics Q&A benchmarks
 │   └── comparison.py       # Model comparison tools
-└── models/                 # Training checkpoints
+└── models/                 # Training checkpoints (git ignored)
 
-fine_tuned_models/
+fine_tuned_models/          # Only deliverable tracked in git
 └── ResearchMate-Mistral-7B/
     ├── adapter_config.json
     ├── adapter_model.safetensors  # Final LoRA adapters (~20MB)
@@ -225,13 +225,15 @@ model = PeftModel.from_pretrained(base_model, adapter_path)
 **Recommended**: 4x NVIDIA A100 80GB  
 **Optimal**: 8x NVIDIA A100 80GB
 
-**Storage**: 200GB for datasets + checkpoints + final model
+**Storage**: 200GB for datasets + checkpoints (not tracked in git)
 
 ## Final Deliverables
 
-1. **LoRA Adapters**: `adapter_model.safetensors` (~20MB)
-2. **Training Metrics**: Performance tracking & comparison
-3. **Evaluation Report**: Detailed improvement analysis
-4. **Integration Code**: Updated LLM manager for production
+1. **LoRA Adapters**: `adapter_model.safetensors` (~20MB) - **tracked in git**
+2. **Training Metrics**: Performance tracking & comparison - **tracked in git**
+3. **Evaluation Report**: Detailed improvement analysis - **tracked in git**
+4. **Integration Code**: Updated LLM manager for production - **tracked in git**
+
+**Note**: Large training data (multi-GB) and intermediate checkpoints are excluded from git tracking to keep the repository lightweight. Only the final deliverable LoRA adapters (~20MB) are version controlled.
 
 **Ready for Phase 4 deployment** with comprehensive monitoring and fallback strategies.

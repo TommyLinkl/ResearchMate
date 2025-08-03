@@ -1,3 +1,102 @@
+# Environment and secrets
 .env
+.env.local
+.env.production
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing and development
 test_files/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and databases
+*.log
+logs/
+*.db
+*.sqlite
+*.sqlite3
+
+# But keep logs directory structure and schema files if any
+!logs/.gitkeep
+!logs/schema.sql
+!logs/README.md
+
+# Large training data and model files
+# =================================
+
+# Raw and processed datasets (can be multi-GB)
+training/data/raw/
+training/data/processed/
+training/data/evaluation/
+
+# Training checkpoints and intermediate models (can be 10GB+ each)
+training/models/
+training/checkpoints/
+training/runs/
+training/tensorboard/
+
+# Downloaded model cache (base models like Mistral-7B are ~14GB)
+.cache/
+cache/
+models/cache/
+.huggingface/
+transformers_cache/
+
+# Model artifacts to exclude
+*.bin
+*.safetensors
+pytorch_model*.bin
+model*.safetensors
+
+# BUT keep the final deliverable LoRA adapters (small files ~10-50MB)
+!fine_tuned_models/
+!fine_tuned_models/**/*.json
+!fine_tuned_models/**/*.txt
+!fine_tuned_models/**/adapter_config.json
+!fine_tuned_models/**/adapter_model.safetensors
+!fine_tuned_models/**/training_args.bin
+!fine_tuned_models/**/README.md
